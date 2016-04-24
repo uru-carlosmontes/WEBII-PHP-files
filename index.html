@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>File Example</title>
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body ng-app="example">
+
+	<h1 class="text-center">Reading &amp; Writing Files (PHP)</h1>
+
+	<h3>Reading A File</h3>
+
+	<button onclick="getUsers()">GET USERS</button>
+
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>NAME</th>
+				<th>LASTNAME</th>
+				<th>AGE</th>
+				<th>PROFESSION</th>
+			</tr>
+		</thead>
+		<tbody id="user_table"></tbody>
+	</table>
+	<hr>
+	<h3>Writing A File</h3>
+
+	<p>ID: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="user_id" type="text"> </p>
+	<p>NAME: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;<input id="user_name" type="text"> </p>
+	<p>LASTNAME: &nbsp;&nbsp;<input id="user_lastName"  type="text"> </p>
+	<p>AGE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="user_age" type="text"> </p>
+	<p>PROFESSION: <input id="user_profession" type="text"> </p>
+
+	<button onclick="sendUser()">SEND USER</button>
+
+	<script>
+		var xhr = new XMLHttpRequest();
+
+		function $ (id) {
+			return document.getElementById(id);
+		}
+
+		function getUsers () {
+			while($("user_table").childNodes.length > 0) {
+				$("user_table").removeChild($("user_table").childNodes[0]);
+			}
+			//WELCOME TO THE NEW JAVASCRIPT (ECMASCRIPT 6)
+			xhr.onreadystatechange = () => {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					var data = JSON.parse(xhr.responseText);
+
+					if (data.status === 200) {
+						var users = data.users;
+
+						users.forEach(function (user, idx) {
+							$("user_table").insertRow(idx);
+							$("user_table").rows[idx].insertCell(0);
+							$("user_table").rows[idx].cells[0].textContent = user.id;
+							$("user_table").rows[idx].insertCell(1);
+							$("user_table").rows[idx].cells[1].textContent = user.name;
+							$("user_table").rows[idx].insertCell(2);
+							$("user_table").rows[idx].cells[2].textContent = user.lastName;
+							$("user_table").rows[idx].insertCell(3);
+							$("user_table").rows[idx].cells[3].textContent = user.age;
+							$("user_table").rows[idx].insertCell(4);
+							$("user_table").rows[idx].cells[4].textContent = user.profession;
+						});
+					} else {
+						console.log("error");
+						console.log(xhr.responseText);
+					}
+				}
+			}
+
+			xhr.open("GET", "./api/user.php", true);
+			xhr.send();
+		}
+
+		function sendUser () {
+				var formData = new FormData();
+
+				formData.append("id", $("user_id").value);
+				formData.append("name", $("user_name").value);
+				formData.append("lastName", $("user_lastName").value);
+				formData.append("age", $("user_age").value);
+				formData.append("profession", $("user_profession").value);
+
+				xhr.onreadystatechange = () => {
+					if (xhr.readyState === 4 && xhr.status === 200) {
+						getUsers();
+					} else {
+						console.log("error");
+						console.log(xhr.responseText);
+					}
+				}
+
+				xhr.open("POST", "./api/user.php", true);
+				xhr.send(formData);
+
+		}
+
+	</script>
+</body>
+</html>
